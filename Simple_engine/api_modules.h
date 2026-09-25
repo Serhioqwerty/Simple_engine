@@ -26,6 +26,14 @@ void GetPointerObjectFromClass(std::shared_ptr<first_class>& entity, std::shared
 	object = std::dynamic_pointer_cast<second_class>(entity);
 }
 
+template<typename first_class_obj, typename second_class_obj>
+
+float GetDistance(Entity object1, Entity object2) {
+	Vector2 pos1 = object1->GetPos();
+	Vector2 pos2 = object2->GetPos();
+	return sqrt((pos1.x - pos2.x) * (pos1.x - pos2.x) + (pos1.y - pos2.y) * (pos1.y - pos2.y));
+}
+
 
 //СТРОГО ДЛЯ ENTITY И ЕГО НАСЛЕДНИКАХ И ТОЛЬКО ЕСЛИ ЭТО УКАЗАТЕЛЬ
 template<typename first_class_obj, typename second_class_obj>
@@ -39,3 +47,7 @@ template<typename... Arg>
 void Print(Arg&&... arg) {
 	(std::cout << ... << arg) << std::endl;
 }
+
+
+//СТРОГО ENTITY И ЕГО НАСЛЕДНИКОВ И ТЕХ, У КОГО ЕСТЬ МЕТОД GETPOS()
+

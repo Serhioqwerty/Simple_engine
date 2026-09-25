@@ -54,12 +54,17 @@ public:
 
 class Engine {
 private:
-	void InitWindow(int width, int height, std::string name);
+
+	int width;
+	int height;
+
+	Camera2D cam = { 0 };
+	void InitWindow(int width, int height, std::string name, Color color);
 	void Init_fps(int fps);
-	
 	void Init_user();
 	void Init_music();
-	void InitPlayer(Object_status st, bool is_render, const char* texture_path, float angle);
+	void InitPlayer(Object_status st, bool is_render, const char* texture_path, float angle, bool is_visible_cam);
+	void InitCam();
 
 protected:
 	std::shared_ptr<Engine_render>win;
@@ -74,13 +79,13 @@ public:
 	~Engine();
 	void Init_engine();
 	void RenderObjects();
-	void CreateEntity(Object_status st, bool is_render);
-	void CreateEntityTexture(Object_status st, bool is_render, const char* texture_path, float angle);
+	void RenderObjectsWithCam();
+	void CreateEntity(Object_status st, bool is_render, bool is_cam);
+	void CreateEntityTexture(Object_status st, bool is_render, const char* texture_path, float angle, bool is_cam);
 	
 	std::shared_ptr<Player>GetPlayer();
 
 	void UpdateLogic();
 	void UpdateEngine();
-	
 
 };

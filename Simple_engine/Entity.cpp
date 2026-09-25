@@ -1,18 +1,26 @@
 #include <raylib.h>
 #include "Entity.h"
 #include <string>
+#include <iostream>
+#include "api_modules.h"
 
-
-Entity::Entity(Object_status st, bool is_render) {
+Entity::Entity(Object_status st, bool is_render, bool is_cam) {
 	this->sprite = st;
 	this->is_render = is_render;
 	this->arg = "/Default /no_texture";
-
+	this->is_moving_object_with_cam = is_cam;
 }
 
+void Entity::SetPointerCam(Camera2D* cam) {
+	this->CamPointer = cam;
+}
 
 Entity::~Entity() {
+	this->CamPointer = nullptr;
+}
 
+bool Entity::GetStatusMovingCam() {
+	return this->is_moving_object_with_cam;
 }
 
 void Entity::SetColor(Color color) {
@@ -35,6 +43,7 @@ Vector2 Entity::GetPos() {
 
 void Entity::draw() {
 	if (this->is_render == true) {
+		
 		DrawRectangle(this->sprite.x, this->sprite.y, this->sprite.width, this->sprite.height, this->sprite.color);
 		
 	}
@@ -46,7 +55,7 @@ Rectangle Entity::GetRect() {
 }
 
 
-Entity_texture::Entity_texture(Object_status st, bool is_render, const char* texture_path, float angle) : Entity(st, is_render) {
+Entity_texture::Entity_texture(Object_status st, bool is_render, const char* texture_path, float angle, bool is_cam) : Entity(st, is_render, is_cam) {
 	this->texture = LoadTexture(texture_path);
 	this->angle = angle;
 }
@@ -61,7 +70,8 @@ Object_status Entity::GetSpriteInfo() {
 
 void Entity_texture::draw() {
 	Vector2 size_texture = { texture.width, texture.height };
-	DrawTexturePro(this->texture, { 0, 0, size_texture.x, size_texture.y }, { sprite.x, sprite.y, this->sprite.width, this->sprite.height }, { 0, 0 }, this->angle, WHITE);
+	Vector2 vec = GetWorldToScreen2D({ sprite.x, sprite.y }, *this->CamPointer);
+	DrawTexturePro(this->texture, { 0, 0, size_texture.x, size_texture.y}, {vec.x, vec.y, this->sprite.width * this->CamPointer->zoom, this->sprite.height * this->CamPointer->zoom}, {0, 0}, this->angle, WHITE);
 }
 
 float Entity_texture::GetAngle() {
@@ -76,9 +86,14 @@ void Entity_texture::AddAngle(float angle) {
 	this->angle += angle;
 }
 
-Player::Player(Object_status st, bool is_render, const char* texture_path, float angle) : Entity_texture(st, is_render, texture_path, angle) {
-	
+Player::Player(Object_status st, bool is_render, const char* texture_path, float angle, bool is_visible_cam) : Entity_texture(st, is_render, texture_path, angle, true) {
+	this->is_visible_cam = is_visible_cam;
 }
+
+bool Player::GetStatusCam() {
+	return this->is_visible_cam;
+}
+
 
 Player::~Player() {
 	
@@ -95,6 +110,11 @@ void Player::Update_keyboard() {
 	else {
 		this->vector_move.x = 0;
 	}
+}
+
+void Player::SetTargetCam(bool st) {
+	if (this->is_visible_cam == st) Print("Warning: is_visible_cam code true");
+	this->is_visible_cam = st;
 }
 
 void Player::Update_player() {

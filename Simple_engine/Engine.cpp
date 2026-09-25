@@ -20,17 +20,37 @@ Engine::~Engine() {
 
 void Engine::RenderObjects() {
 	for (auto& o : Objects) {
-		o->draw();
+		if (o->GetStatusMovingCam() == false) {
+			o->draw();
+		}
 	}
 }
 
-void Engine::CreateEntity(Object_status st, bool is_render) {
-	this->Objects.push_back(std::make_shared<Entity>(st, is_render));
+void Engine::RenderObjectsWithCam() {
+
+
+	BeginMode2D(this->cam);
+	for (auto& o : Objects) {
+		
+		if (o->GetStatusMovingCam() == true) {
+			o->draw();
+		}
+		
+	}
+	EndMode2D();
+}
+
+void Engine::CreateEntity(Object_status st, bool is_render, bool is_cam) {
+	this->Objects.push_back(std::make_shared<Entity>(st, is_render, is_cam));
+	int index = Objects.size() - 1;
+	Objects[index]->SetPointerCam(&cam);
 
 }
 
-void Engine::CreateEntityTexture(Object_status st, bool is_render, const char* texture_path, float angle) {
-	this->Objects.push_back(std::make_shared<Entity_texture>(st, is_render, texture_path, angle));
+void Engine::CreateEntityTexture(Object_status st, bool is_render, const char* texture_path, float angle, bool is_cam) {
+	this->Objects.push_back(std::make_shared<Entity_texture>(st, is_render, texture_path, angle, is_cam));
+	int index = Objects.size() - 1;
+	Objects[index]->SetPointerCam(&cam);
 }
 
 void Engine::Init_fps(int fps) {
@@ -38,8 +58,22 @@ void Engine::Init_fps(int fps) {
 }
 
 
-void Engine::InitPlayer(Object_status st, bool is_render, const char* texture_path, float angle) {
-	this->player = std::make_shared<Player>(st, is_render, texture_path, angle);
+void Engine::InitPlayer(Object_status st, bool is_render, const char* texture_path, float angle, bool is_visible_cam) {
+	this->player = std::make_shared<Player>(st, is_render, texture_path, angle, is_visible_cam);
+	this->player->SetPointerCam(&this->cam);
+}
+
+void Engine::InitWindow(int width, int height, std::string name, Color color) {
+	this->win = std::make_shared<Engine_render>(width, height, name, color);
+	this->width = width;
+	this->height = height;
+}
+
+void Engine::InitCam() {
+	if (this->player->GetStatusCam() == true) cam.target = this->player->GetPos();
+	cam.offset = { (float)this->width / 2, (float)this->height / 2 };
+	cam.zoom = 2;
+	cam.rotation = 0;
 }
 
 void Engine::Init_music() {
@@ -47,17 +81,18 @@ void Engine::Init_music() {
 }
 
 void Engine::Init_user() {
-	InitPlayer({ 50, 50, 50, 50, WHITE }, true, "assets\\Red_soul.png", 0);
+	InitPlayer({ 50, 50, 50, 50, WHITE }, true, "assets\\Red_soul.png", 0, true);
 }
 
 
 
 void Engine::Init_engine() {
-	this->win = std::make_shared<Engine_render>(640, 720, "Undertale", RED);
+	InitWindow(640, 720, "UNDERTALE", RED);
 	Init_fps(60);
 	Init_user();
 	Init_music();
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
+	InitCam();
 	
 }
 
@@ -100,8 +135,16 @@ void Engine::UpdateEngine() {
 
 		RenderObjects();
 		
+
+
 		this->player->Update_player();
+		if (this->player->GetStatusCam() == true) {
+			this->cam.target = this->player->GetPos();
+			this->cam.offset = { (float)this->width / 2, (float)this->height / 2 };
+		}
+
 		UpdateLogic();
+		RenderObjectsWithCam();
 
 		EndDrawing();
 	}

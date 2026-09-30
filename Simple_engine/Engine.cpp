@@ -40,17 +40,19 @@ void Engine::RenderObjectsWithCam() {
 	EndMode2D();
 }
 
-void Engine::CreateEntity(Object_status st, bool is_render, bool is_cam) {
-	this->Objects.push_back(std::make_shared<Entity>(st, is_render, is_cam));
+void Engine::CreateEntity(Object_status st, bool is_render, bool is_cam, bool is_col) {
+	this->Objects.push_back(std::make_shared<Entity>(st, is_render, is_cam, is_col));
 	int index = Objects.size() - 1;
 	Objects[index]->SetPointerCam(&cam);
+	Objects[index]->SetPointerGame(this);
 
 }
 
-void Engine::CreateEntityTexture(Object_status st, bool is_render, const char* texture_path, float angle, bool is_cam) {
-	this->Objects.push_back(std::make_shared<Entity_texture>(st, is_render, texture_path, angle, is_cam));
+void Engine::CreateEntityTexture(Object_status st, bool is_render, const char* texture_path, float angle, bool is_cam, bool is_col) {
+	this->Objects.push_back(std::make_shared<Entity_texture>(st, is_render, texture_path, angle, is_cam, is_col));
 	int index = Objects.size() - 1;
 	Objects[index]->SetPointerCam(&cam);
+	Objects[index]->SetPointerGame(this);
 }
 
 void Engine::Init_fps(int fps) {
@@ -58,9 +60,10 @@ void Engine::Init_fps(int fps) {
 }
 
 
-void Engine::InitPlayer(Object_status st, bool is_render, const char* texture_path, float angle, bool is_visible_cam) {
-	this->player = std::make_shared<Player>(st, is_render, texture_path, angle, is_visible_cam);
+void Engine::InitPlayer(Object_status st, bool is_render, const char* texture_path, float angle, bool is_visible_cam, bool is_gravity) {
+	this->player = std::make_shared<Player>(st, is_render, texture_path, angle, is_visible_cam, is_gravity);
 	this->player->SetPointerCam(&this->cam);
+	this->player->SetPointerGame(this);
 }
 
 void Engine::InitWindow(int width, int height, std::string name, Color color) {
@@ -72,7 +75,7 @@ void Engine::InitWindow(int width, int height, std::string name, Color color) {
 void Engine::InitCam() {
 	if (this->player->GetStatusCam() == true) cam.target = this->player->GetPos();
 	cam.offset = { (float)this->width / 2, (float)this->height / 2 };
-	cam.zoom = 2;
+	cam.zoom = 1;
 	cam.rotation = 0;
 }
 
@@ -81,7 +84,7 @@ void Engine::Init_music() {
 }
 
 void Engine::Init_user() {
-	InitPlayer({ 50, 50, 50, 50, WHITE }, true, "assets\\Red_soul.png", 0, true);
+	InitPlayer({ 50, 50, 50, 50, WHITE }, true, "assets\\Red_soul.png", 0, true, false);
 }
 
 

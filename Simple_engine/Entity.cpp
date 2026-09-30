@@ -3,12 +3,36 @@
 #include <string>
 #include <iostream>
 #include "api_modules.h"
+#include "Engine.h"
 
-Entity::Entity(Object_status st, bool is_render, bool is_cam) {
+const float collision_wall_k = 4;
+
+Entity::Entity(Object_status st, bool is_render, bool is_cam, bool is_collision) {
 	this->sprite = st;
 	this->is_render = is_render;
 	this->arg = "/Default /no_texture";
 	this->is_moving_object_with_cam = is_cam;
+	this->is_collision = is_collision;
+}
+
+void Entity::SetKiller(bool st) {
+	this->is_killer = st;
+}
+bool Entity::GetKiller() {
+	return this->is_killer;
+}
+
+void Entity::SetPos(Vector2 pos) {
+	this->sprite.x = pos.x;
+	this->sprite.y = pos.y;
+}
+
+bool Entity::GetStatusCollision() {
+	return this->is_collision;
+}
+
+void Entity::SetPointerGame(Engine* engine) {
+	this->engine = engine;
 }
 
 void Entity::SetPointerCam(Camera2D* cam) {
@@ -17,6 +41,7 @@ void Entity::SetPointerCam(Camera2D* cam) {
 
 Entity::~Entity() {
 	this->CamPointer = nullptr;
+	this->engine = nullptr;
 }
 
 bool Entity::GetStatusMovingCam() {
@@ -55,7 +80,7 @@ Rectangle Entity::GetRect() {
 }
 
 
-Entity_texture::Entity_texture(Object_status st, bool is_render, const char* texture_path, float angle, bool is_cam) : Entity(st, is_render, is_cam) {
+Entity_texture::Entity_texture(Object_status st, bool is_render, const char* texture_path, float angle, bool is_cam, bool is_colision) : Entity(st, is_render, is_cam, is_colision) {
 	this->texture = LoadTexture(texture_path);
 	this->angle = angle;
 }
@@ -86,8 +111,13 @@ void Entity_texture::AddAngle(float angle) {
 	this->angle += angle;
 }
 
-Player::Player(Object_status st, bool is_render, const char* texture_path, float angle, bool is_visible_cam) : Entity_texture(st, is_render, texture_path, angle, true) {
+Player::Player(Object_status st, bool is_render, const char* texture_path, float angle, bool is_visible_cam, bool is_gravity) : Entity_texture(st, is_render, texture_path, angle, true, true) {
 	this->is_visible_cam = is_visible_cam;
+	this->is_gravity = is_gravity;
+}
+
+void Player::SetGravity(bool st) {
+	this->is_gravity = st;
 }
 
 bool Player::GetStatusCam() {
@@ -100,15 +130,30 @@ Player::~Player() {
 }
 
 void Player::Update_keyboard() {
-	if (IsKeyDown(this->key_move[0])) this->vector_move.y = -speed;
-	else if (IsKeyDown(this->key_move[1])) this->vector_move.y = speed;
-	else {
-		this->vector_move.y = 0;
+	if (this->is_gravity == false) {
+		if (IsKeyDown(this->key_move[0])) this->vector_move.y = -speed;
+		else if (IsKeyDown(this->key_move[1])) this->vector_move.y = speed;
+		else {
+			this->vector_move.y = 0;
+		}
+		if (IsKeyDown(this->key_move[2])) this->vector_move.x = -speed;
+		else if (IsKeyDown(this->key_move[3])) this->vector_move.x = speed;
+		else {
+			this->vector_move.x = 0;
+		}
 	}
-	if (IsKeyDown(this->key_move[2])) this->vector_move.x = -speed;
-	else if (IsKeyDown(this->key_move[3])) this->vector_move.x = speed;
 	else {
-		this->vector_move.x = 0;
+		if (IsKeyDown(this->key_move[2])) this->vector_move.x = -speed;
+		else if (IsKeyDown(this->key_move[3])) this->vector_move.x = speed;
+		else {
+			this->vector_move.x = 0;
+		}
+		if (IsKeyDown(this->key_move[0]) and vector_move.y == 0) this->vector_move.y = -speed;
+		else {
+			vector_move.y += gravity;
+		}
+		
+		
 	}
 }
 
@@ -119,6 +164,24 @@ void Player::SetTargetCam(bool st) {
 
 void Player::Update_player() {
 	this->Update_keyboard();
-	this->move(this->vector_move.x, this->vector_move.y);
+	this->sprite.x += vector_move.x * GetFrameTime();
+	for (auto& o : this->engine->Objects) {
+		if (CheckCollisionRecs(this->GetRect(), o->GetRect())) {
+			this->SetPos({ old_pos.x, this->GetPos().y});
+			this->vector_move.x = 0;
+		}
+	}
+
+	this->sprite.y += vector_move.y * GetFrameTime();
+	for (auto& o : this->engine->Objects) {
+		if (CheckCollisionRecs(this->GetRect(), o->GetRect())) {
+			this->SetPos({ this->GetPos().x, old_pos.y });
+			this->vector_move.y = 0;
+			if (o->GetKiller()) {
+				this->~Player();
+			}
+		}
+	}
 	this->draw();
+	this->old_pos = this->GetPos();
 }

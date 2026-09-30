@@ -12,24 +12,31 @@ struct Object_status {
 	Color color;
 };
 
+class Engine;
+
 class Entity {
 protected:
 	Object_status sprite;
 	std::vector <type_script>scripts;
 	bool is_moving_object_with_cam;
 	Camera2D* CamPointer;
-
+	bool is_collision;
+	Engine* engine;
+	bool is_killer = false;
 private:
 	bool is_render;
 	std::string arg;
-
-public:
 	
-	Entity(Object_status st, bool is_render, bool is_cam);
+public:
+	void SetPos(Vector2 pos);
+	void SetPointerGame(Engine* engine);
+	Entity(Object_status st, bool is_render, bool is_cam, bool is_colision);
 	void SetPointerCam(Camera2D* cam);
 	Object_status GetSpriteInfo();
 	void SetColor(Color color);
 	void move(float dx, float dy);
+	void SetKiller(bool st);
+	bool GetKiller();
 	Vector2 GetPos();
 	void add_size(float d_width, float d_height);
 	//1 аргумент: лямда функции, 2 аргумент: входные данные (любые)
@@ -41,6 +48,7 @@ public:
 	virtual void draw();
 	Rectangle GetRect();
 	bool GetStatusMovingCam();
+	bool GetStatusCollision();
 };
 class Entity_texture : public Entity {
 private:
@@ -49,7 +57,7 @@ protected:
 	Texture2D texture;
 	float scale;
 public:
-	Entity_texture(Object_status st, bool is_render, const char* texture_path, float angle, bool is_cam);
+	Entity_texture(Object_status st, bool is_render, const char* texture_path, float angle, bool is_cam, bool is_colision);
    ~Entity_texture() override;
     void draw() override;
 	float GetAngle();
@@ -59,20 +67,3 @@ public:
 
 };
 
-class Player : public Entity_texture {
-private:
-	const float speed = 200;
-	const int key_move[4] = { KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT };
-	Vector2 vector_move = { 0, 0 };
-	void Update_keyboard();
-	bool is_visible_cam = false;
-public:
-	
-	Player(Object_status st, bool is_render, const char* texture_path, float angle, bool is_visible_cam);
-	~Player() override;
-	void Update_player();
-	bool GetStatusCam();
-	void SetTargetCam(bool st);
-
-
-};

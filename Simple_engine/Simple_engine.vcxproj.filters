@@ -56,5 +56,8 @@
     <ClInclude Include="Audio.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

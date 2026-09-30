@@ -9,6 +9,7 @@
 #include <random>
 #include <cstdlib>
 #include <ctime>
+#include "Player.h"
 
 struct ashab_tamaev {
 	std::unique_ptr<std::string>Machina;
@@ -63,25 +64,25 @@ private:
 	void Init_fps(int fps);
 	void Init_user();
 	void Init_music();
-	void InitPlayer(Object_status st, bool is_render, const char* texture_path, float angle, bool is_visible_cam);
+	void InitPlayer(Object_status st, bool is_render, const char* texture_path, float angle, bool is_visible_cam, bool is_gravity);
 	void InitCam();
 
 protected:
+
 	std::shared_ptr<Engine_render>win;
-	std::vector<std::shared_ptr<Entity>>Objects;
+	
 	std::shared_ptr<Player>player;
 	std::unique_ptr<Music_player>music_player;
-
 public:
 
-	
+	std::vector<std::shared_ptr<Entity>>Objects;
 
 	~Engine();
 	void Init_engine();
 	void RenderObjects();
 	void RenderObjectsWithCam();
-	void CreateEntity(Object_status st, bool is_render, bool is_cam);
-	void CreateEntityTexture(Object_status st, bool is_render, const char* texture_path, float angle, bool is_cam);
+	void CreateEntity(Object_status st, bool is_render, bool is_cam, bool is_col);
+	void CreateEntityTexture(Object_status st, bool is_render, const char* texture_path, float angle, bool is_cam, bool is_col);
 	
 	std::shared_ptr<Player>GetPlayer();
 

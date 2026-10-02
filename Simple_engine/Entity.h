@@ -50,6 +50,21 @@ public:
 	bool GetStatusMovingCam();
 	bool GetStatusCollision();
 };
+
+
+class Entity_text : public Entity {
+private:
+	int font_size;
+	std::string text;
+	Color color_text;
+
+public:
+	Entity_text(Object_status st, bool is_render, bool is_cam, bool is_colision, int font_size, Color color_text, std::string text);
+	~Entity_text() override;
+	void draw() override;
+	void SetText(std::string text);
+};
+
 class Entity_texture : public Entity {
 private:
 	float angle;

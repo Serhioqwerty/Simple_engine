@@ -129,6 +129,24 @@ Player::~Player() {
 	
 }
 
+void Entity_text::draw() {
+	DrawText(this->text.c_str(), this->GetPos().x + 10, this->GetPos().y + 10, this->font_size, this->color_text);
+}
+
+Entity_text::Entity_text(Object_status st, bool is_render, bool is_cam, bool is_colision, int font_size, Color color_text, std::string text) : Entity(st, is_render, is_cam, is_colision) {
+	this->text = text;
+	this->font_size = font_size;
+	this->color_text = color_text;
+}
+
+Entity_text::~Entity_text() {
+
+}
+
+void Entity_text::SetText(std::string text) {
+	this->text = text;
+}
+
 void Player::Update_keyboard() {
 	if (this->is_gravity == false) {
 		if (IsKeyDown(this->key_move[0])) this->vector_move.y = -speed;

@@ -125,6 +125,9 @@ void DeltaTimeGame::stop() {
 
 
 
+void Engine::CreateEntityText(Object_status st, bool is_render, bool is_cam, bool is_colision, int font_size, Color color_text, std::string text) {
+	this->Objects.push_back(std::make_shared<Entity_text>(st, is_render, is_cam, is_colision, font_size, color_text, text));
+}
 
 void Engine::UpdateEngine() {
 	while (!WindowShouldClose()) {

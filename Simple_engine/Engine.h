@@ -83,7 +83,8 @@ public:
 	void RenderObjectsWithCam();
 	void CreateEntity(Object_status st, bool is_render, bool is_cam, bool is_col);
 	void CreateEntityTexture(Object_status st, bool is_render, const char* texture_path, float angle, bool is_cam, bool is_col);
-	
+	void CreateEntityText(Object_status st, bool is_render, bool is_cam, bool is_colision, int font_size, Color color_text, std::string text);
+
 	std::shared_ptr<Player>GetPlayer();
 
 	void UpdateLogic();

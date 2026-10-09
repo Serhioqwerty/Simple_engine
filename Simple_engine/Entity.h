@@ -69,13 +69,14 @@ class Entity_texture : public Entity {
 private:
 	float angle;
 protected:
-	Texture2D texture;
+	Texture2D* texture;
 	float scale;
 public:
-	Entity_texture(Object_status st, bool is_render, const char* texture_path, float angle, bool is_cam, bool is_colision);
+	Entity_texture(Object_status st, bool is_render, float angle, bool is_cam, bool is_colision);
    ~Entity_texture() override;
     void draw() override;
 	float GetAngle();
+	void SetTexture(Texture2D* texture);
 	void SetAngle(float angle);
 	void AddAngle(float angle);
 

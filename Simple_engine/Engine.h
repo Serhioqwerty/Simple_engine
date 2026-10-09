@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <ctime>
 #include "Player.h"
+#include <unordered_map>
 
 struct ashab_tamaev {
 	std::unique_ptr<std::string>Machina;
@@ -64,13 +65,14 @@ private:
 	void Init_fps(int fps);
 	void Init_user();
 	void Init_music();
-	void InitPlayer(Object_status st, bool is_render, const char* texture_path, float angle, bool is_visible_cam, bool is_gravity);
+	void InitPlayer(Object_status st, bool is_render, const char* name, float angle, bool is_visible_cam, bool is_gravity);
 	void InitCam();
 
 protected:
 
+	std::unordered_map<std::string, Texture2D>Textures;
+
 	std::shared_ptr<Engine_render>win;
-	
 	std::shared_ptr<Player>player;
 	std::unique_ptr<Music_player>music_player;
 public:
@@ -82,8 +84,11 @@ public:
 	void RenderObjects();
 	void RenderObjectsWithCam();
 	void CreateEntity(Object_status st, bool is_render, bool is_cam, bool is_col);
-	void CreateEntityTexture(Object_status st, bool is_render, const char* texture_path, float angle, bool is_cam, bool is_col);
+	void CreateEntityTexture(Object_status st, bool is_render, const char* name, float angle, bool is_cam, bool is_col);
 	void CreateEntityText(Object_status st, bool is_render, bool is_cam, bool is_colision, int font_size, Color color_text, std::string text);
+
+	void InitTexture(std::string name, std::string path);
+	void InitTextures();
 
 	std::shared_ptr<Player>GetPlayer();
 

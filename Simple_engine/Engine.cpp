@@ -48,11 +48,17 @@ void Engine::CreateEntity(Object_status st, bool is_render, bool is_cam, bool is
 
 }
 
-void Engine::CreateEntityTexture(Object_status st, bool is_render, const char* texture_path, float angle, bool is_cam, bool is_col) {
-	this->Objects.push_back(std::make_shared<Entity_texture>(st, is_render, texture_path, angle, is_cam, is_col));
+void Engine::CreateEntityTexture(Object_status st, bool is_render, const char* name, float angle, bool is_cam, bool is_col) {
+	this->Objects.push_back(std::make_shared<Entity_texture>(st, is_render, angle, is_cam, is_col));
 	int index = Objects.size() - 1;
 	Objects[index]->SetPointerCam(&cam);
 	Objects[index]->SetPointerGame(this);
+	Texture2D* tex = nullptr;
+	auto it = this->Textures.find(name);
+	if (it != this->Textures.end()) {
+		tex = &(it->second);
+	}
+	if(tex != nullptr)std::dynamic_pointer_cast<Entity_texture>(Objects[index])->SetTexture(tex);
 }
 
 void Engine::Init_fps(int fps) {
@@ -60,10 +66,16 @@ void Engine::Init_fps(int fps) {
 }
 
 
-void Engine::InitPlayer(Object_status st, bool is_render, const char* texture_path, float angle, bool is_visible_cam, bool is_gravity) {
-	this->player = std::make_shared<Player>(st, is_render, texture_path, angle, is_visible_cam, is_gravity);
+void Engine::InitPlayer(Object_status st, bool is_render, const char* name, float angle, bool is_visible_cam, bool is_gravity) {
+	this->player = std::make_shared<Player>(st, is_render, angle, is_visible_cam, is_gravity);
 	this->player->SetPointerCam(&this->cam);
 	this->player->SetPointerGame(this);
+	Texture2D* tex = nullptr;
+	auto it = this->Textures.find(name);
+	if (it != this->Textures.end()) {
+		tex = &(it->second);
+	}
+	if(tex != nullptr)this->player->SetTexture(tex);
 }
 
 void Engine::InitWindow(int width, int height, std::string name, Color color) {
@@ -84,7 +96,7 @@ void Engine::Init_music() {
 }
 
 void Engine::Init_user() {
-	InitPlayer({ 50, 50, 50, 50, WHITE }, true, "assets\\Red_soul.png", 0, true, false);
+	InitPlayer({ 50, 50, 50, 50, WHITE }, true, "Red", 0, true, false);
 }
 
 
@@ -92,11 +104,29 @@ void Engine::Init_user() {
 void Engine::Init_engine() {
 	InitWindow(640, 720, "UNDERTALE", RED);
 	Init_fps(60);
+	InitTextures();
 	Init_user();
 	Init_music();
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 	InitCam();
 	
+}
+
+void Engine::InitTexture(std::string name, std::string path) {
+	
+	const char* p = path.c_str();
+
+	if (this->Textures.find(name.c_str()) != this->Textures.end()) {
+		Print("This texture is created!");
+		return;
+	}
+
+	this->Textures.insert({ name, LoadTexture(p) });
+}
+
+void Engine::InitTextures() {
+	InitTexture("Chara", "assets\\chara.png");
+	InitTexture("Red", "assets\\Red_soul.png");
 }
 
 std::shared_ptr<Player> Engine::GetPlayer() {
@@ -149,6 +179,7 @@ void Engine::UpdateEngine() {
 			this->cam.offset = { (float)this->width / 2, (float)this->height / 2 };
 		}
 
+		DrawText("V 1.1", 100, 50, 48, BLUE);
 		UpdateLogic();
 		RenderObjectsWithCam();
 

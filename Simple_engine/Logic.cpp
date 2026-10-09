@@ -34,9 +34,9 @@ void Engine::UpdateLogic() {
 	}
 	if (is_disable_cam2 == false and timer.GetTime() > 1) {
 		if (is_loaded_texture_1 == false) {
-			CreateEntityTexture({ 10, 10, 50, 50, WHITE }, true, "assets\\chara.png", 0, false, true);
-			CreateEntityTexture({ 200, 20, 50, 50, WHITE }, true, "assets\\chara.png", 0, false, true);
-			CreateEntityTexture({ 400, 30, 50, 50, WHITE }, true, "assets\\chara.png", 0, false, true);
+			CreateEntityTexture({ 10, 10, 50, 50, WHITE }, true, "Chara", 0, false, true);
+			CreateEntityTexture({ 200, 20, 50, 50, WHITE }, true, "Chara", 0, false, true);
+			CreateEntityTexture({ 400, 30, 50, 50, WHITE }, true, "Chara", 0, false, true);
 			CreateEntity({ 0, 1000, 1000, 300, GREEN }, true, true, true);
 			CreateEntity({ 100, 950, 300, 50, GRAY }, true, true, true);
 			CreateEntityText({ 100, 850, 300, 50, WHITE }, true, true, false, 32, GREEN, "Hello world");

@@ -17,7 +17,7 @@ private:
 
 public:
 
-	Player(Object_status st, bool is_render, const char* texture_path, float angle, bool is_visible_cam, bool is_gravity);
+	Player(Object_status st, bool is_render, float angle, bool is_visible_cam, bool is_gravity);
 	~Player() override;
 	void Update_player();
 	bool GetStatusCam();

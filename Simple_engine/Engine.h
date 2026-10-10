@@ -70,7 +70,7 @@ private:
 
 protected:
 
-	std::unordered_map<std::string, Texture2D>Textures;
+	std::unordered_map<std::string, std::shared_ptr<Texture2D>>Textures;
 
 	std::shared_ptr<Engine_render>win;
 	std::shared_ptr<Player>player;
@@ -89,6 +89,8 @@ public:
 
 	void InitTexture(std::string name, std::string path);
 	void InitTextures();
+
+	void UnloadTextureManager(const char* name);
 
 	std::shared_ptr<Player>GetPlayer();
 

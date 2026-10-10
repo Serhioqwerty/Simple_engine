@@ -44,6 +44,14 @@ Entity::~Entity() {
 	this->engine = nullptr;
 }
 
+void Entity::SetRender(bool is) {
+	this->is_render = is;
+}
+
+bool Entity::GetRender() {
+	return this->is_render;
+}
+
 bool Entity::GetStatusMovingCam() {
 	return this->is_moving_object_with_cam;
 }
@@ -66,8 +74,16 @@ Vector2 Entity::GetPos() {
 	return { this->sprite.x, this->sprite.y };
 }
 
-void Entity_texture::SetTexture(Texture2D* texture) {
+void Entity_texture::SetTexture(std::shared_ptr<Texture2D> texture) {
 	this->texture = texture;
+}
+
+void Entity_texture::SetNameTexture(std::string name) {
+	this->name_texture = name;
+}
+
+std::string Entity_texture::GetNameTexture() {
+	return this->name_texture;
 }
 
 void Entity::draw() {
@@ -86,11 +102,11 @@ Rectangle Entity::GetRect() {
 
 Entity_texture::Entity_texture(Object_status st, bool is_render, float angle, bool is_cam, bool is_colision) : Entity(st, is_render, is_cam, is_colision) {
 	this->angle = angle;
-	this->texture = nullptr;
+
 }
 
 Entity_texture::~Entity_texture() {
-	this->texture = nullptr;
+	this->texture.reset();
 }
 
 Object_status Entity::GetSpriteInfo() {
@@ -98,12 +114,24 @@ Object_status Entity::GetSpriteInfo() {
 }
 
 void Entity_texture::draw() {
-	Vector2 size_texture = { texture->width, texture->height };
-	Vector2 vec = GetWorldToScreen2D({ sprite.x, sprite.y }, *this->CamPointer);
-	if(this->texture->id != 0 or this->texture != nullptr) DrawTexturePro(*this->texture, { 0, 0, size_texture.x, size_texture.y}, {vec.x, vec.y, this->sprite.width * this->CamPointer->zoom, this->sprite.height * this->CamPointer->zoom}, {0, 0}, this->angle, WHITE);
+	if (this->texture.lock()->id != 0) {
+		Vector2 size_texture = { texture.lock()->width, texture.lock()->height};
+		Vector2 vec = GetWorldToScreen2D({ sprite.x, sprite.y }, *this->CamPointer);
+		DrawTexturePro(*this->texture.lock(), {0, 0, size_texture.x, size_texture.y}, {vec.x, vec.y, this->sprite.width * this->CamPointer->zoom, this->sprite.height * this->CamPointer->zoom}, {0, 0}, this->angle, WHITE);
+	}
 	else {
 		Print("Is not drawing");
 	}
+	
+	
+}
+
+void Entity::SetSuicide(bool is) {
+	this->is_suicide = is;
+}
+
+bool Entity::GetSuicide() {
+	return this->is_suicide;
 }
 
 float Entity_texture::GetAngle() {
@@ -121,7 +149,6 @@ void Entity_texture::AddAngle(float angle) {
 Player::Player(Object_status st, bool is_render, float angle, bool is_visible_cam, bool is_gravity) : Entity_texture(st, is_render, angle, true, true) {
 	this->is_visible_cam = is_visible_cam;
 	this->is_gravity = is_gravity;
-	this->texture = nullptr;
 }
 
 void Player::SetGravity(bool st) {
@@ -153,6 +180,14 @@ Entity_text::~Entity_text() {
 
 void Entity_text::SetText(std::string text) {
 	this->text = text;
+}
+
+void Entity::SetFlag(std::string flag) {
+	this->flag = flag;
+}
+
+std::string Entity::GetFlag() {
+	return this->flag;
 }
 
 void Player::Update_keyboard() {

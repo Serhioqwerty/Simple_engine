@@ -7,6 +7,7 @@
 #include "api_modules.h"
 #include <cstdlib>
 #include <ctime>
+#include <raylib.h>
 
 
 std::shared_ptr<Player>player;
@@ -19,23 +20,39 @@ Engine::~Engine() {
 
 
 void Engine::RenderObjects() {
+	int i = 0;
 	for (auto& o : Objects) {
 		if (o->GetStatusMovingCam() == false) {
-			o->draw();
+			if (o->GetRender()) {
+				if (!o->GetSuicide()) {
+					o->draw();
+				}
+				else {
+					this->Objects.erase(Objects.begin() + i);
+				}
+			}
 		}
+		i++;
 	}
 }
 
 void Engine::RenderObjectsWithCam() {
-
+	int i = 0;
 
 	BeginMode2D(this->cam);
 	for (auto& o : Objects) {
 		
 		if (o->GetStatusMovingCam() == true) {
-			o->draw();
+			if (o->GetRender()) {
+				if (!o->GetSuicide()) {
+					o->draw();
+				}
+				else {
+					this->Objects.erase(Objects.begin() + i);
+				}
+			}
 		}
-		
+		i++;
 	}
 	EndMode2D();
 }
@@ -45,7 +62,7 @@ void Engine::CreateEntity(Object_status st, bool is_render, bool is_cam, bool is
 	int index = Objects.size() - 1;
 	Objects[index]->SetPointerCam(&cam);
 	Objects[index]->SetPointerGame(this);
-
+	Objects[index]->SetFlag("Entity");
 }
 
 void Engine::CreateEntityTexture(Object_status st, bool is_render, const char* name, float angle, bool is_cam, bool is_col) {
@@ -53,12 +70,13 @@ void Engine::CreateEntityTexture(Object_status st, bool is_render, const char* n
 	int index = Objects.size() - 1;
 	Objects[index]->SetPointerCam(&cam);
 	Objects[index]->SetPointerGame(this);
-	Texture2D* tex = nullptr;
+	Objects[index]->SetFlag("Entity_texture");
+
 	auto it = this->Textures.find(name);
 	if (it != this->Textures.end()) {
-		tex = &(it->second);
+		std::dynamic_pointer_cast<Entity_texture>(Objects[index])->SetTexture(it->second);
+		std::dynamic_pointer_cast<Entity_texture>(Objects[index])->SetNameTexture(it->first);
 	}
-	if(tex != nullptr)std::dynamic_pointer_cast<Entity_texture>(Objects[index])->SetTexture(tex);
 }
 
 void Engine::Init_fps(int fps) {
@@ -70,12 +88,10 @@ void Engine::InitPlayer(Object_status st, bool is_render, const char* name, floa
 	this->player = std::make_shared<Player>(st, is_render, angle, is_visible_cam, is_gravity);
 	this->player->SetPointerCam(&this->cam);
 	this->player->SetPointerGame(this);
-	Texture2D* tex = nullptr;
+
 	auto it = this->Textures.find(name);
-	if (it != this->Textures.end()) {
-		tex = &(it->second);
-	}
-	if(tex != nullptr)this->player->SetTexture(tex);
+	
+	if(it->second != nullptr)this->player->SetTexture(it->second);
 }
 
 void Engine::InitWindow(int width, int height, std::string name, Color color) {
@@ -121,10 +137,21 @@ void Engine::InitTexture(std::string name, std::string path) {
 		return;
 	}
 
-	this->Textures.insert({ name, LoadTexture(p) });
+	auto tex = std::shared_ptr<Texture2D>(
+		new Texture2D(LoadTexture(p)),
+		[](Texture2D* t) {
+			if (t->id != 0) {
+				UnloadTexture(*t);
+				t->id = 0;
+			}
+			delete t;
+		}
+	);
+	this->Textures.insert({ name, tex });
 }
 
 void Engine::InitTextures() {
+	InitTexture("ERROR", "assets\\System\\Error_texture.png");
 	InitTexture("Chara", "assets\\chara.png");
 	InitTexture("Red", "assets\\Red_soul.png");
 }
@@ -153,6 +180,36 @@ void DeltaTimeGame::stop() {
 	this->is_work = false;
 }
 
+
+void Engine::UnloadTextureManager(const char* name) {
+	if (name == "") return;
+	auto tex = this->Textures.find(name);
+	if (tex != this->Textures.end()) {
+		UnloadTexture(*tex->second);
+		tex->second->id = 0;
+		this->Textures.erase(name);
+		
+		for (auto& o : Objects) {
+			std::dynamic_pointer_cast<Entity_texture>(o);
+			if (o->GetFlag() == "Entity_texture") {
+				if (std::dynamic_pointer_cast<Entity_texture>(o)->GetNameTexture() == name) {
+					auto texture_error = this->Textures.find("ERROR");
+					if (texture_error != this->Textures.end()) {
+						std::dynamic_pointer_cast<Entity_texture>(o)->SetTexture(texture_error->second);
+						std::dynamic_pointer_cast<Entity_texture>(o)->SetNameTexture("ERROR");
+						
+					}
+					
+				}
+			}
+			
+		}
+		
+		Print("Texture is delete");
+	}
+	
+
+}
 
 
 void Engine::CreateEntityText(Object_status st, bool is_render, bool is_cam, bool is_colision, int font_size, Color color_text, std::string text) {

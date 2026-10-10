@@ -23,8 +23,11 @@ protected:
 	bool is_collision;
 	Engine* engine;
 	bool is_killer = false;
-private:
 	bool is_render;
+	bool is_suicide = false;
+	std::string flag;
+private:
+	
 	std::string arg;
 	
 public:
@@ -49,6 +52,15 @@ public:
 	Rectangle GetRect();
 	bool GetStatusMovingCam();
 	bool GetStatusCollision();
+
+	void SetRender(bool is);
+	bool GetRender();
+
+	void SetSuicide(bool is);
+	bool GetSuicide();
+
+	void SetFlag(std::string flag);
+	std::string GetFlag();
 };
 
 
@@ -69,17 +81,22 @@ class Entity_texture : public Entity {
 private:
 	float angle;
 protected:
-	Texture2D* texture;
+	std::weak_ptr<Texture2D> texture;
 	float scale;
+
+	std::string name_texture;
 public:
 	Entity_texture(Object_status st, bool is_render, float angle, bool is_cam, bool is_colision);
    ~Entity_texture() override;
     void draw() override;
 	float GetAngle();
-	void SetTexture(Texture2D* texture);
+	void SetTexture(std::shared_ptr<Texture2D> texture);
+	void SetNameTexture(std::string name);
+	std::string GetNameTexture();
 	void SetAngle(float angle);
 	void AddAngle(float angle);
-
+	
+	
 
 };
 

@@ -14,8 +14,11 @@ bool is_disable_cam = false;
 bool is_disable_cam2 = true;
 bool is_loaded_texture_1 = false;
 
+
 int index_object;
 int index_obj_1;
+
+int id_operation = 0;
 
 std::shared_ptr<Player>pl;
 
@@ -26,11 +29,13 @@ void Engine::UpdateLogic() {
 		this->player->SetTargetCam(false);
 		is_disable_cam = true;
 		timer.reset();
+		id_operation++;
 	}
 	if (is_disable_cam2 == true and timer.GetTime() > 1) {
 		this->player->SetTargetCam(true);
 		is_disable_cam2 = false;
 		timer.reset();
+		id_operation++;
 	}
 	if (is_disable_cam2 == false and timer.GetTime() > 1) {
 		if (is_loaded_texture_1 == false) {
@@ -44,7 +49,11 @@ void Engine::UpdateLogic() {
 			is_loaded_texture_1 = true;
 			index_object = Objects.size() - 1;
 			player->SetGravity(true);
+			id_operation++;
 		}
+	}
+	if (id_operation == 3 and timer.GetTime() > 3) {
+		UnloadTextureManager("Chara");
 	}
 
 	
